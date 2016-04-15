@@ -5,24 +5,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
-/**
- * Created by skrtbhtngr on 3/31/16.
- */
 @SuppressWarnings("Duplicates")
-public class MergeSort
+public final class MergeSort<T extends Comparable<T>>
 {
-    static int processors;
-    static ExecutorService es;
-    static Comparable[] input;
+    private static final int processors;
+    private static final ExecutorService es;
+    private final T[] input;
     static
     {
         es = Executors.newCachedThreadPool();
         processors = Runtime.getRuntime().availableProcessors();
     }
-    public static void inPlaceMerge(int lo, int mid, int hi)
+    public MergeSort(T[] input)
+    {
+        this.input=input;
+    }
+    private void inPlaceMerge(int lo, int mid, int hi)
     {
         int l=lo, r=mid+1;
-        Comparable tmp;
+        T tmp;
         if(input[mid].compareTo(input[r])<=0)
             return;
         while(l<=mid && r<=hi)
@@ -40,10 +41,10 @@ public class MergeSort
             }
         }
     }
-    public static void merge(int lo, int mid, int hi)
+    private void merge(int lo, int mid, int hi)
     {
         int l=lo, r=mid+1, k=0;
-        Comparable[] aux = new Comparable[hi-lo+1];
+        T[] aux = (T[])new Comparable[hi-lo+1];
         while(l<=mid && r<=hi)
         {
             if(input[l].compareTo(input[r])<0)
@@ -55,19 +56,22 @@ public class MergeSort
             aux[k++]=input[l++];
         while(r<=hi)
             aux[k++]=input[r++];
-        for(int i=lo;i<=hi;i++)
-            input[i]=aux[i-lo];
+        System.arraycopy(aux,0,input,lo,hi-lo+1);
     }
-    public static void sort(int lo, int hi)
+    public void sort(int lo, int hi)
     {
         if(hi-lo>=1)
         {
             int mid=lo+(hi-lo)/2;
-            if(hi-lo>=(MergeSort.input.length/MergeSort.processors))
+            if(hi-lo>=(input.length/MergeSort.processors))
             {
-                //System.out.println((hi-lo)+" "+((ThreadPoolExecutor)MergeSort.es).getActiveCount()+" "+Thread.currentThread().getName());
-                Thread a = new Thread(new MergeSortThread(lo, mid));
-                Future f = MergeSort.es.submit(a);
+                Thread a = new Thread(){
+                    public void run()
+                    {
+                        sort(lo,mid);
+                    }
+                };
+                Future f = es.submit(a);
                 sort(mid + 1, hi);
                 try
                 {
@@ -79,25 +83,21 @@ public class MergeSort
                 }
                 if(input[mid].compareTo(input[mid+1])<=0)
                     return;
-                MergeSort.merge(lo,mid,hi);
+                merge(lo,mid,hi);
             }
             else if(hi-lo<=10)
-            {
-                InsertionSort is = new InsertionSort();
-                is.input=MergeSort.input;
-                is.sort(lo,hi);
-            }
+                new InsertionSort<>(input).sort(lo,hi);
             else
             {
                 sort(lo,mid);
                 sort(mid+1,hi);
                 if(input[mid].compareTo(input[mid+1])<=0)
                     return;
-                MergeSort.merge(lo,mid,hi);
+                merge(lo,mid,hi);
             }
         }
     }
-    public static boolean check()
+    public boolean check()
     {
         for(int i=0;i<input.length-1;i++)
             if(input[i].compareTo(input[i+1])>0)
@@ -112,12 +112,12 @@ public class MergeSort
         for(int i=0;i<arr.length;i++)
             arr[i]=rnd.nextInt(1000000);
 
-        MergeSort.input=arr;
+        MergeSort ms = new MergeSort<>(arr);
         long a = System.nanoTime();
-        MergeSort.sort(0,arr.length-1);
+        ms.sort(0,arr.length-1);
         long b = System.nanoTime();
         System.out.println("Time taken: "+(b-a)/1E9);
-        System.out.println(MergeSort.check());
+        System.out.println(ms.check());
 
         System.out.println(((ThreadPoolExecutor)MergeSort.es).getPoolSize());
         MergeSort.es.shutdown();

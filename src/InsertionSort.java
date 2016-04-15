@@ -1,15 +1,16 @@
 import java.util.Arrays;
 import java.util.Random;
 
-/**
- * Created by skrtbhtngr on 4/12/16.
- */
-public class InsertionSort
+public class InsertionSort<T extends Comparable<T>>
 {
-    static Comparable[] input;
+    private T[] input;
+    public InsertionSort(T[] input)
+    {
+        this.input=input;
+    }
     public void sort(int lo, int hi)
     {
-        Comparable x;
+        T x;
         int i, j;
         for(i=lo+1;i<=hi;i++)
         {
@@ -38,8 +39,7 @@ public class InsertionSort
         for(int i=0;i<arr.length;i++)
             arr[i]=rnd.nextInt(1000000);
 
-        InsertionSort is = new InsertionSort();
-        is.input=arr;
+        InsertionSort is = new InsertionSort<>(arr);
         System.out.println(Arrays.toString(is.input));
         long a = System.nanoTime();
         is.sort(0,arr.length-1);

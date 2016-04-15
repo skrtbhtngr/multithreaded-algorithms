@@ -1,9 +1,6 @@
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Created by skrtbhtngr on 4/15/16.
- */
 public class FibonacciSeries
 {
     static int processors;

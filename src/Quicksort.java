@@ -6,36 +6,36 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @SuppressWarnings("Duplicates")
-public class Quicksort
+public final class Quicksort<T extends Comparable<T>>
 {
-    static int processors;
-    static ExecutorService es;
-    static Comparable[] input;
-    public Quicksort()
+    private static final int processors;
+    private static final ExecutorService es;
+    private final T[] input;
+    static
     {
         es = Executors.newCachedThreadPool();
         processors = Runtime.getRuntime().availableProcessors();
     }
-    public static void swap(int i, int j)
+    public Quicksort(T[] input)
     {
-        Comparable temp=input[i];
+        this.input=input;
+    }
+    private void swap(int i, int j)
+    {
+        T temp=input[i];
         input[i]=input[j];
         input[j]=temp;
     }
-    public static int partition(int lo, int hi)
+    private int partition(int lo, int hi)
     {
-        Comparable temp;
         Random rnd = new Random();
         rnd.setSeed(System.nanoTime());
-        int r = rnd.nextInt(hi-lo+1)+lo;
-        temp=input[r];
-        input[r]=input[hi];
-        input[hi]=temp;
+        swap(hi,rnd.nextInt(hi-lo+1)+lo);
 
-        Comparable pivot = input[hi];
+        T pivot = input[hi];
 
-        int i=lo, j;
-        for(j=lo;j<hi;j++)
+        int i=lo;
+        for(int j=lo;j<hi;j++)
             if(input[j].compareTo(pivot)<0)
                 swap(i++,j);
         swap(i,hi);
@@ -43,31 +43,35 @@ public class Quicksort
     }
     public void sort(int lo, int hi)
     {
-        if(hi-lo>=(Quicksort.input.length/Quicksort.processors))
+        if(hi-lo>=1)
         {
-            int p = Quicksort.partition(lo, hi);
-            Thread a = new Thread(new QuicksortThread(lo, p - 1));
-            Future f = Quicksort.es.submit(a);
-            sort(p + 1, hi);
-            try
+            if (hi - lo >= (input.length / Quicksort.processors))
             {
-                f.get();
-            } catch (Exception e)
+                int p = partition(lo, hi);
+                Thread a = new Thread()
+                {
+                    public void run()
+                    {
+                        sort(lo, p - 1);
+                    }
+                };
+                Future f = es.submit(a);
+                sort(p + 1, hi);
+                try
+                {
+                    f.get();
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            } else if (hi - lo <= 100)
+                new InsertionSort<>(input).sort(lo, hi);
+            else
             {
-                e.printStackTrace();
+                int p = partition(lo, hi);
+                sort(lo, p - 1);
+                sort(p + 1, hi);
             }
-        }
-        else if(hi-lo<=100)
-        {
-            InsertionSort is = new InsertionSort();
-            is.input=Quicksort.input;
-            is.sort(lo,hi);
-        }
-        else
-        {
-            int p = Quicksort.partition(lo, hi);
-            sort(lo, p - 1);
-            sort(p + 1, hi);
         }
     }
     public boolean check()
@@ -85,8 +89,7 @@ public class Quicksort
         for (int i = 0; i < arr.length; i++)
             arr[i] = rnd.nextInt(1000000);
 
-        Quicksort qs = new Quicksort();
-        qs.input = arr;
+        Quicksort qs = new Quicksort<>(arr);
         long a = System.nanoTime();
         qs.sort(0, arr.length - 1);
         long b = System.nanoTime();
