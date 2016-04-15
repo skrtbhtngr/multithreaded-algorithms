@@ -5,9 +5,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
-/**
- * Created by skrtbhtngr on 4/2/16.
- */
 @SuppressWarnings("Duplicates")
 public class Quicksort
 {
@@ -97,6 +94,7 @@ public class Quicksort
         System.out.println(qs.check());
 
         System.out.println(((ThreadPoolExecutor) Quicksort.es).getPoolSize());
+        Quicksort.es.shutdown();
 
         rnd.setSeed(System.nanoTime());
         for (int i = 0; i < arr.length; i++)
