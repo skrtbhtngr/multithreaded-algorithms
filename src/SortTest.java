@@ -1,22 +1,29 @@
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Random;
 
-@SuppressWarnings("Duplicates")
-public class SortTest {
-    static final int INPUT_SIZE = 10000000;
+/**
+ * This class is a
+ *
+ * @author Sukrit Bhatnagar
+ * @version 1.0
+ */
+public class SortTest
+{
+    private static final int INPUT_SIZE = 10000000;
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException
+    {
         Integer[] arr = new Integer[INPUT_SIZE];
         Random rnd = new Random();
 
-        Mergesort ms;
-        Quicksort qs;
+        MergeSort ms;
+        QuickSort qs;
         Integer[] input = new Integer[INPUT_SIZE];
         long a, b;
         int t;
         //Random values
-        for (t = 1; t <= 10; t++) {
+        for (t = 1; t <= 10; t++)
+        {
             rnd.setSeed(System.nanoTime());
             for (int i = 0; i < arr.length; i++)
                 arr[i] = rnd.nextInt(Integer.MAX_VALUE);
@@ -34,14 +41,14 @@ public class SortTest {
             System.out.print(((b - a) / 1E9) + "\t");
 
             System.arraycopy(arr, 0, input, 0, arr.length);
-            ms = new Mergesort<>(input);
+            ms = new MergeSort<>(input);
             a = System.nanoTime();
             ms.sort();
             b = System.nanoTime();
             System.out.print(((b - a) / 1E9) + "\t");
 
             System.arraycopy(arr, 0, input, 0, arr.length);
-            qs = new Quicksort<>(input);
+            qs = new QuickSort<>(input);
             a = System.nanoTime();
             qs.sort();
             b = System.nanoTime();
